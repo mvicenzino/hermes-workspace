@@ -27,8 +27,9 @@ import { cn } from '@/lib/utils'
 
 /** Duration (ms) the thinking indicator stays visible after waitingForResponse
  *  clears, giving the first response message time to render before the
- *  indicator disappears — prevents a flash of blank space (Bug 2 fix). */
-const THINKING_GRACE_PERIOD_MS = 400
+ *  indicator disappears — prevents a flash of blank space (Bug 2 fix).
+ *  Increased to 800ms as a safety net for slow connections. */
+const THINKING_GRACE_PERIOD_MS = 800
 
 /** Map tool names to human-readable status strings */
 const TOOL_STATUS_MAP: Record<string, string> = {
@@ -682,22 +683,24 @@ function ChatMessageListComponent({
   // Bug 2 fix: also show during grace period (thinkingGrace) so there's no
   // blank-space flash between waitingForResponse clearing and the response
   // message actually rendering.
-  // Tool-gap fix: also show when streaming is active but no text has arrived
-  // yet — this covers the gap between tool call results arriving and the
-  // assistant text stream starting (tool calls in progress or just completed).
+  // Gap fix: also show whenever isStreaming=true but streamingText is still
+  // empty — this covers ALL cases where the stream has started (SSE connected,
+  // tool calls in flight OR just completed) but the first text chunk hasn't
+  // arrived yet. Removing the old `activeToolCalls.length > 0` gate ensures
+  // the indicator stays alive even after tool calls finish and before text flows.
   const showTypingIndicator = (() => {
     // sending covers the instant the HTTP request fires before waitingForResponse
     // is confirmed by the gateway (they're typically batched but this is belt+suspenders)
     const effectivelyWaiting = waitingForResponse || thinkingGrace || sending
-    // Tool-gap condition: streaming is active (tool calls in flight or result
-    // just arrived) but no text chunk has been received yet. Keep the indicator
-    // visible so there's no blank space between tool completion and text stream
-    // start, even if waitingForResponse already cleared.
-    const toolGapActive =
-      isStreaming &&
-      (!streamingText || streamingText.length === 0) &&
-      activeToolCalls.length > 0
-    if (!effectivelyWaiting && !toolGapActive) return false
+    // Streaming-but-empty condition: the SSE stream is active (isRealtimeStreaming)
+    // but no text chunk has arrived yet. Keep the indicator visible so there's
+    // NEVER a blank gap between tool completion / thinking and the first visible
+    // text — regardless of whether tool calls are still in flight.
+    // Key invariant: one of {thinking bubble, message with text} must ALWAYS be
+    // on screen from send until response is complete.
+    const streamingButEmpty =
+      isStreaming && (!streamingText || streamingText.trim().length === 0)
+    if (!effectivelyWaiting && !streamingButEmpty) return false
     // If streaming has visible text, hide indicator — response is rendering
     if (isStreaming && streamingText && streamingText.length > 0) return false
     const lastMessage = displayMessages[displayMessages.length - 1]
