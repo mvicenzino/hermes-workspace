@@ -103,6 +103,11 @@ export const Route = createFileRoute('/api/chat-events')({
                       name: data?.name, toolCallId: data?.toolCallId,
                       args: data?.args, runId, sessionKey: targetSessionKey,
                     })
+                  } else if (stream === 'compaction') {
+                    // Gateway emits phase:"start" when auto-compaction begins,
+                    // phase:"end" when it completes. Forward both so the UI can
+                    // show the exact same indicator as the OpenClaw control UI.
+                    sendEvent('compaction', { phase: data?.phase, sessionKey: targetSessionKey })
                   }
                   return
                 }
