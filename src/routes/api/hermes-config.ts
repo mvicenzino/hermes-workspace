@@ -10,6 +10,8 @@ import YAML from 'yaml'
 import { createCapabilityUnavailablePayload } from '@/lib/feature-gates'
 import { isAuthenticated } from '../../server/auth-middleware'
 import {
+  HERMES_API,
+  BEARER_TOKEN,
   ensureGatewayProbed,
   getCapabilities,
 } from '../../server/gateway-capabilities'
@@ -126,8 +128,38 @@ export const Route = createFileRoute('/api/hermes-config')({
           })
         }
 
-        const config = readConfig()
+        let config = readConfig()
         const env = readEnv()
+
+        // If local config is empty (e.g. running on Vercel without local filesystem),
+        // fetch the active model from the agent's latest session
+        const hasLocalConfig = Object.keys(config).length > 0
+        let remoteModel = ''
+        let remoteProvider = ''
+        if (!hasLocalConfig && HERMES_API) {
+          try {
+            const headers: Record<string, string> = {}
+            if (BEARER_TOKEN) headers['Authorization'] = `Bearer ${BEARER_TOKEN}`
+            const res = await fetch(`${HERMES_API}/api/sessions?limit=1`, {
+              headers,
+              signal: AbortSignal.timeout(8_000),
+            })
+            if (res.ok) {
+              const data = await res.json() as { items?: Array<{ model?: string }> }
+              const latest = data.items?.[0]
+              if (latest?.model) {
+                remoteModel = latest.model
+                // Infer provider from model name prefix
+                if (remoteModel.startsWith('google/')) remoteProvider = 'google'
+                else if (remoteModel.startsWith('anthropic/') || remoteModel.startsWith('claude')) remoteProvider = 'anthropic'
+                else if (remoteModel.startsWith('openai/') || remoteModel.startsWith('gpt')) remoteProvider = 'openai'
+                else if (remoteModel.includes('/')) remoteProvider = remoteModel.split('/')[0]
+              }
+            }
+          } catch {
+            // Agent unreachable — fall through with empty config
+          }
+        }
 
         // Build provider status
         const providerStatus = PROVIDERS.map((p) => {
@@ -162,6 +194,12 @@ export const Route = createFileRoute('/api/hermes-config')({
           const modelObj = modelField as Record<string, unknown>
           activeModel = (modelObj.default as string) || ''
           activeProvider = (modelObj.provider as string) || (config.provider as string) || ''
+        }
+
+        // Fall back to remote model info if local config was empty
+        if (!activeModel && remoteModel) {
+          activeModel = remoteModel
+          activeProvider = activeProvider || remoteProvider
         }
 
         return Response.json({

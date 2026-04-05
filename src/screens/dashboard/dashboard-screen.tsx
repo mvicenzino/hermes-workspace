@@ -18,6 +18,7 @@ import type { HermesSession } from '@/server/hermes-api'
 import { getUnavailableReason } from '@/lib/feature-gates'
 import { useFeatureAvailable } from '@/hooks/use-feature-available'
 import { cn } from '@/lib/utils'
+import { PaperclipSection } from './paperclip-widgets'
 
 // ── Helpers ──────────────────────────────────────────────────────
 
@@ -501,6 +502,9 @@ export function DashboardScreen() {
           description={getUnavailableReason('sessions')}
         />
       )}
+
+      {/* ── Paperclip Integration ── */}
+      <PaperclipSection />
     </div>
   )
 }

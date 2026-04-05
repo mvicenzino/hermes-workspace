@@ -136,3 +136,4 @@ __pycache__/
 
 .env.docker
 .env.bak
+.vercel

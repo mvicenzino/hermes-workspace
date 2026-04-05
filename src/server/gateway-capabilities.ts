@@ -17,7 +17,7 @@ export const HERMES_UPGRADE_INSTRUCTIONS =
 export const SESSIONS_API_UNAVAILABLE_MESSAGE =
   `Your Hermes gateway does not support the sessions API. ${HERMES_UPGRADE_INSTRUCTIONS}`
 
-const PROBE_TIMEOUT_MS = 3_000
+const PROBE_TIMEOUT_MS = 8_000
 const PROBE_TTL_MS = 30_000
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ async function probeChatCompletions(): Promise<boolean> {
         messages: [{ role: 'user', content: 'hi' }],
         max_tokens: 1,
       }),
-      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS + 5_000),
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS + 7_000),
     })
     // 200 = works. 400/422 = endpoint exists. 401 = exists, bad auth.
     if (res.ok || res.status === 400 || res.status === 422 || res.status === 401) return true
@@ -201,6 +201,11 @@ export async function probeGateway(options?: {
         probe('/api/jobs'),
       ])
 
+    // The workspace handles config and memory via its own file-based routes
+    // (reading ~/.hermes/config.yaml and ~/.hermes/memories/ directly).
+    // The Hermes Agent may not expose /api/config or /api/memory endpoints,
+    // but these features are available whenever we have a healthy enhanced gateway.
+    const isEnhanced = sessions && health
     capabilities = {
       // Core
       health,
@@ -211,8 +216,8 @@ export async function probeGateway(options?: {
       // Enhanced
       sessions,
       skills,
-      memory,
-      config,
+      memory: memory || isEnhanced,
+      config: config || isEnhanced,
       jobs,
     }
     lastProbeAt = Date.now()

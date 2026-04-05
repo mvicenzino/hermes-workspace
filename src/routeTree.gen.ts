@@ -36,6 +36,7 @@ import { Route as ApiSendStreamRouteImport } from './routes/api/send-stream'
 import { Route as ApiSendRouteImport } from './routes/api/send'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as ApiPathsRouteImport } from './routes/api/paths'
+import { Route as ApiPaperclipRouteImport } from './routes/api/paperclip'
 import { Route as ApiModelsRouteImport } from './routes/api/models'
 import { Route as ApiHistoryRouteImport } from './routes/api/history'
 import { Route as ApiHermesJobsRouteImport } from './routes/api/hermes-jobs'
@@ -193,6 +194,11 @@ const ApiPathsRoute = ApiPathsRouteImport.update({
   path: '/api/paths',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPaperclipRoute = ApiPaperclipRouteImport.update({
+  id: '/api/paperclip',
+  path: '/api/paperclip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiModelsRoute = ApiModelsRouteImport.update({
   id: '/api/models',
   path: '/api/models',
@@ -322,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/api/hermes-jobs': typeof ApiHermesJobsRouteWithChildren
   '/api/history': typeof ApiHistoryRoute
   '/api/models': typeof ApiModelsRoute
+  '/api/paperclip': typeof ApiPaperclipRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/api/hermes-jobs': typeof ApiHermesJobsRouteWithChildren
   '/api/history': typeof ApiHistoryRoute
   '/api/models': typeof ApiModelsRoute
+  '/api/paperclip': typeof ApiPaperclipRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/api/hermes-jobs': typeof ApiHermesJobsRouteWithChildren
   '/api/history': typeof ApiHistoryRoute
   '/api/models': typeof ApiModelsRoute
+  '/api/paperclip': typeof ApiPaperclipRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
@@ -474,6 +483,7 @@ export interface FileRouteTypes {
     | '/api/hermes-jobs'
     | '/api/history'
     | '/api/models'
+    | '/api/paperclip'
     | '/api/paths'
     | '/api/ping'
     | '/api/send'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/api/hermes-jobs'
     | '/api/history'
     | '/api/models'
+    | '/api/paperclip'
     | '/api/paths'
     | '/api/ping'
     | '/api/send'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/api/hermes-jobs'
     | '/api/history'
     | '/api/models'
+    | '/api/paperclip'
     | '/api/paths'
     | '/api/ping'
     | '/api/send'
@@ -624,6 +636,7 @@ export interface RootRouteChildren {
   ApiHermesJobsRoute: typeof ApiHermesJobsRouteWithChildren
   ApiHistoryRoute: typeof ApiHistoryRoute
   ApiModelsRoute: typeof ApiModelsRoute
+  ApiPaperclipRoute: typeof ApiPaperclipRoute
   ApiPathsRoute: typeof ApiPathsRoute
   ApiPingRoute: typeof ApiPingRoute
   ApiSendRoute: typeof ApiSendRoute
@@ -839,6 +852,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPathsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/paperclip': {
+      id: '/api/paperclip'
+      path: '/api/paperclip'
+      fullPath: '/api/paperclip'
+      preLoaderRoute: typeof ApiPaperclipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/models': {
       id: '/api/models'
       path: '/api/models'
@@ -1051,6 +1071,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHermesJobsRoute: ApiHermesJobsRouteWithChildren,
   ApiHistoryRoute: ApiHistoryRoute,
   ApiModelsRoute: ApiModelsRoute,
+  ApiPaperclipRoute: ApiPaperclipRoute,
   ApiPathsRoute: ApiPathsRoute,
   ApiPingRoute: ApiPingRoute,
   ApiSendRoute: ApiSendRoute,
