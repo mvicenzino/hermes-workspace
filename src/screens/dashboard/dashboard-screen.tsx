@@ -147,27 +147,27 @@ function MetricTile({ label, value, sub, icon, accentColor }: {
 
 // ── Activity Chart ───────────────────────────────────────────────
 
-function ActivityChart({ sessions }: { sessions: HermesSession[] }) {
+function ActivityChart() {
+  const statsQuery = useQuery({
+    queryKey: ['session-stats'],
+    queryFn: async () => {
+      const res = await fetch('/api/session-stats?days=14')
+      if (!res.ok) return []
+      const data = await res.json()
+      return (data.stats ?? []) as Array<{ date: string; sessions: number; messages: number; sources: Record<string, number> }>
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  })
+
   const chartData = useMemo(() => {
-    const dayMap = new Map<string, { sessions: number; messages: number }>()
-    const now = Date.now() / 1000
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date((now - i * 86400) * 1000)
-      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      dayMap.set(key, { sessions: 0, messages: 0 })
-    }
-    for (const s of sessions) {
-      if (!s.started_at) continue
-      const d = new Date(s.started_at * 1000)
-      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      const entry = dayMap.get(key)
-      if (entry) {
-        entry.sessions += 1
-        entry.messages += s.message_count ?? 0
-      }
-    }
-    return Array.from(dayMap.entries()).map(([date, data]) => ({ date, ...data }))
-  }, [sessions])
+    const stats = statsQuery.data ?? []
+    return stats.map(s => ({
+      date: new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      sessions: s.sessions,
+      messages: s.messages,
+    }))
+  }, [statsQuery.data])
 
   return (
     <GlassCard title="Activity" titleRight={<span className="text-[10px] text-muted">14 days</span>} accentColor="#6366f1" className="h-full">
@@ -456,7 +456,7 @@ export function DashboardScreen() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         <div className="lg:col-span-5">
           {sessionsAvailable ? (
-            <ActivityChart sessions={sessions} />
+            <ActivityChart />
           ) : (
             <UnavailableWidget
               title="Activity"

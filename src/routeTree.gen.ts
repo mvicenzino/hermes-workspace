@@ -33,6 +33,7 @@ import { Route as ApiStartAgentRouteImport } from './routes/api/start-agent'
 import { Route as ApiSkillsRouteImport } from './routes/api/skills'
 import { Route as ApiSessionsRouteImport } from './routes/api/sessions'
 import { Route as ApiSessionStatusRouteImport } from './routes/api/session-status'
+import { Route as ApiSessionStatsRouteImport } from './routes/api/session-stats'
 import { Route as ApiSendStreamRouteImport } from './routes/api/send-stream'
 import { Route as ApiSendRouteImport } from './routes/api/send'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
@@ -178,6 +179,11 @@ const ApiSessionsRoute = ApiSessionsRouteImport.update({
 const ApiSessionStatusRoute = ApiSessionStatusRouteImport.update({
   id: '/api/session-status',
   path: '/api/session-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSessionStatsRoute = ApiSessionStatsRouteImport.update({
+  id: '/api/session-stats',
+  path: '/api/session-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSendStreamRoute = ApiSendStreamRouteImport.update({
@@ -340,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
+  '/api/session-stats': typeof ApiSessionStatsRoute
   '/api/session-status': typeof ApiSessionStatusRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/api/skills': typeof ApiSkillsRoute
@@ -391,6 +398,7 @@ export interface FileRoutesByTo {
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
+  '/api/session-stats': typeof ApiSessionStatsRoute
   '/api/session-status': typeof ApiSessionStatusRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/api/skills': typeof ApiSkillsRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/api/ping': typeof ApiPingRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
+  '/api/session-stats': typeof ApiSessionStatsRoute
   '/api/session-status': typeof ApiSessionStatusRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/api/skills': typeof ApiSkillsRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/api/ping'
     | '/api/send'
     | '/api/send-stream'
+    | '/api/session-stats'
     | '/api/session-status'
     | '/api/sessions'
     | '/api/skills'
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/api/ping'
     | '/api/send'
     | '/api/send-stream'
+    | '/api/session-stats'
     | '/api/session-status'
     | '/api/sessions'
     | '/api/skills'
@@ -601,6 +612,7 @@ export interface FileRouteTypes {
     | '/api/ping'
     | '/api/send'
     | '/api/send-stream'
+    | '/api/session-stats'
     | '/api/session-status'
     | '/api/sessions'
     | '/api/skills'
@@ -654,6 +666,7 @@ export interface RootRouteChildren {
   ApiPingRoute: typeof ApiPingRoute
   ApiSendRoute: typeof ApiSendRoute
   ApiSendStreamRoute: typeof ApiSendStreamRoute
+  ApiSessionStatsRoute: typeof ApiSessionStatsRoute
   ApiSessionStatusRoute: typeof ApiSessionStatusRoute
   ApiSessionsRoute: typeof ApiSessionsRouteWithChildren
   ApiSkillsRoute: typeof ApiSkillsRoute
@@ -842,6 +855,13 @@ declare module '@tanstack/react-router' {
       path: '/api/session-status'
       fullPath: '/api/session-status'
       preLoaderRoute: typeof ApiSessionStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/session-stats': {
+      id: '/api/session-stats'
+      path: '/api/session-stats'
+      fullPath: '/api/session-stats'
+      preLoaderRoute: typeof ApiSessionStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/send-stream': {
@@ -1097,6 +1117,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPingRoute: ApiPingRoute,
   ApiSendRoute: ApiSendRoute,
   ApiSendStreamRoute: ApiSendStreamRoute,
+  ApiSessionStatsRoute: ApiSessionStatsRoute,
   ApiSessionStatusRoute: ApiSessionStatusRoute,
   ApiSessionsRoute: ApiSessionsRouteWithChildren,
   ApiSkillsRoute: ApiSkillsRoute,
