@@ -9,6 +9,7 @@ import {
   File01Icon,
   PuzzleIcon,
   Settings01Icon,
+  Task01Icon,
 } from '@hugeicons/core-free-icons'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { TouchEvent } from 'react'
@@ -70,6 +71,13 @@ const TABS: Array<TabItem> = [
     icon: Clock01Icon,
     to: '/jobs',
     match: (p) => p.startsWith('/jobs'),
+  },
+  {
+    id: 'projects',
+    label: 'Projects',
+    icon: Task01Icon,
+    to: '/projects',
+    match: (p) => p.startsWith('/projects'),
   },
   {
     id: 'memory',

@@ -8,24 +8,42 @@ const API = '/api/paperclip'
 
 export type PaperclipIssue = {
   id: string
+  companyId: string
   identifier: string
+  issueNumber: number
   title: string
-  description?: string
+  description?: string | null
   status: 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done' | 'blocked' | 'cancelled'
   priority: 'critical' | 'high' | 'medium' | 'low'
   assigneeAgentId?: string | null
   projectId?: string | null
   parentId?: string | null
+  completedAt?: string | null
   createdAt?: string
   updatedAt?: string
 }
 
 export type PaperclipAgent = {
   id: string
+  companyId: string
   name: string
   role?: string
+  title?: string
+  icon?: string | null
   status?: string
-  lastHeartbeat?: string
+  capabilities?: string
+  adapterType?: string
+  adapterConfig?: Record<string, unknown>
+  runtimeConfig?: {
+    heartbeat?: {
+      enabled?: boolean
+      intervalSec?: number
+    }
+  }
+  lastHeartbeatAt?: string | null
+  urlKey?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type PaperclipProject = {
@@ -33,6 +51,13 @@ export type PaperclipProject = {
   name: string
   description?: string
   issueCount?: number
+}
+
+export type PaperclipDashboardStats = {
+  agents: { active: number; running: number; paused: number; error: number }
+  tasks: { open: number; inProgress: number; blocked: number; done: number }
+  costs: { monthSpendCents: number; monthBudgetCents: number }
+  pendingApprovals: number
 }
 
 export type PaperclipRun = {
@@ -70,33 +95,45 @@ async function paperclipFetch<T>(sub: string, params?: Record<string, string>): 
 
 // ── Public API ────────────────────────────────────────────────────
 
+// Paperclip returns flat arrays for list endpoints, or wrapped objects — handle both
+function unwrap<T>(data: unknown, keys: string[]): T[] {
+  if (Array.isArray(data)) return data as T[]
+  if (data && typeof data === 'object') {
+    for (const k of keys) {
+      const val = (data as Record<string, unknown>)[k]
+      if (Array.isArray(val)) return val as T[]
+    }
+  }
+  return []
+}
+
 export async function fetchPaperclipIssues(status?: string): Promise<PaperclipIssue[]> {
   const params: Record<string, string> = {}
   if (status) params.status = status
-  const data = await paperclipFetch<{ issues?: PaperclipIssue[]; items?: PaperclipIssue[] }>('issues', params)
-  return data.issues ?? data.items ?? []
+  const data = await paperclipFetch<unknown>('issues', params)
+  return unwrap<PaperclipIssue>(data, ['issues', 'items'])
 }
 
 export async function fetchPaperclipAgents(): Promise<PaperclipAgent[]> {
-  const data = await paperclipFetch<{ agents?: PaperclipAgent[]; items?: PaperclipAgent[] }>('agents')
-  return data.agents ?? data.items ?? []
+  const data = await paperclipFetch<unknown>('agents')
+  return unwrap<PaperclipAgent>(data, ['agents', 'items'])
 }
 
 export async function fetchPaperclipProjects(): Promise<PaperclipProject[]> {
-  const data = await paperclipFetch<{ projects?: PaperclipProject[]; items?: PaperclipProject[] }>('projects')
-  return data.projects ?? data.items ?? []
+  const data = await paperclipFetch<unknown>('projects')
+  return unwrap<PaperclipProject>(data, ['projects', 'items'])
 }
 
 export async function fetchPaperclipRuns(limit = 10): Promise<PaperclipRun[]> {
-  const data = await paperclipFetch<{ runs?: PaperclipRun[]; items?: PaperclipRun[] }>('runs', { limit: String(limit) })
-  return data.runs ?? data.items ?? []
+  const data = await paperclipFetch<unknown>('runs', { limit: String(limit) })
+  return unwrap<PaperclipRun>(data, ['runs', 'items'])
 }
 
 export async function fetchPaperclipActivity(limit = 20): Promise<PaperclipActivity[]> {
-  const data = await paperclipFetch<{ activity?: PaperclipActivity[]; items?: PaperclipActivity[] }>('activity', { limit: String(limit) })
-  return data.activity ?? data.items ?? []
+  const data = await paperclipFetch<unknown>('activity', { limit: String(limit) })
+  return unwrap<PaperclipActivity>(data, ['activity', 'items'])
 }
 
-export async function fetchPaperclipDashboard(): Promise<Record<string, unknown>> {
-  return paperclipFetch<Record<string, unknown>>('dashboard')
+export async function fetchPaperclipDashboard(): Promise<PaperclipDashboardStats> {
+  return paperclipFetch<PaperclipDashboardStats>('dashboard')
 }

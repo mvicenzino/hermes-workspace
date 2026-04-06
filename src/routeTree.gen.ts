@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TerminalRouteImport } from './routes/terminal'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as FilesRouteImport } from './routes/files'
@@ -72,6 +73,11 @@ const SkillsRoute = SkillsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/files': typeof FilesRoute
   '/jobs': typeof JobsRoute
   '/memory': typeof MemoryRoute
+  '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
   '/terminal': typeof TerminalRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/files': typeof FilesRoute
   '/jobs': typeof JobsRoute
   '/memory': typeof MemoryRoute
+  '/projects': typeof ProjectsRoute
   '/skills': typeof SkillsRoute
   '/terminal': typeof TerminalRoute
   '/api/auth': typeof ApiAuthRoute
@@ -415,6 +423,7 @@ export interface FileRoutesById {
   '/files': typeof FilesRoute
   '/jobs': typeof JobsRoute
   '/memory': typeof MemoryRoute
+  '/projects': typeof ProjectsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
   '/terminal': typeof TerminalRoute
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/jobs'
     | '/memory'
+    | '/projects'
     | '/settings'
     | '/skills'
     | '/terminal'
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/jobs'
     | '/memory'
+    | '/projects'
     | '/skills'
     | '/terminal'
     | '/api/auth'
@@ -569,6 +580,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/jobs'
     | '/memory'
+    | '/projects'
     | '/settings'
     | '/skills'
     | '/terminal'
@@ -621,6 +633,7 @@ export interface RootRouteChildren {
   FilesRoute: typeof FilesRoute
   JobsRoute: typeof JobsRoute
   MemoryRoute: typeof MemoryRoute
+  ProjectsRoute: typeof ProjectsRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   SkillsRoute: typeof SkillsRoute
   TerminalRoute: typeof TerminalRoute
@@ -682,6 +695,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -1056,6 +1076,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilesRoute: FilesRoute,
   JobsRoute: JobsRoute,
   MemoryRoute: MemoryRoute,
+  ProjectsRoute: ProjectsRoute,
   SettingsRoute: SettingsRouteWithChildren,
   SkillsRoute: SkillsRoute,
   TerminalRoute: TerminalRoute,
