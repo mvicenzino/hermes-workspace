@@ -74,11 +74,20 @@ export type PaperclipRun = {
 
 export type PaperclipActivity = {
   id: string
-  type: string
-  message: string
-  timestamp: string
-  actorName?: string
+  action: string
   actorType?: 'agent' | 'user'
+  actorId?: string
+  agentId?: string
+  entityType?: string
+  entityId?: string
+  details?: {
+    identifier?: string
+    issueTitle?: string
+    bodySnippet?: string
+    agentName?: string
+    [key: string]: unknown
+  }
+  createdAt: string
 }
 
 // ── Fetch helpers ─────────────────────────────────────────────────

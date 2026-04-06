@@ -234,18 +234,27 @@ export function PaperclipActivityWidget() {
     return (
       <PaperclipCard title="Paperclip Activity" accentColor="#8b5cf6">
         <div className="space-y-1">
-          {activity.map((item: PaperclipActivity) => (
-            <div key={item.id} className="flex items-start gap-2.5 rounded-lg px-3 py-2">
-              <span className="size-1.5 shrink-0 rounded-full bg-[var(--theme-accent)] mt-1.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-ink truncate">{item.message}</p>
-                <p className="text-[10px] text-muted">
-                  {item.actorName && <span className="font-medium">{item.actorName} · </span>}
-                  {timeAgo(item.timestamp)}
-                </p>
+          {activity.map((item: PaperclipActivity) => {
+            const label = item.action.replace(/\./g, ' ').replace(/_/g, ' ')
+            const title = item.details?.issueTitle || item.details?.agentName || ''
+            const id = item.details?.identifier || ''
+            return (
+              <div key={item.id} className="flex items-start gap-2.5 rounded-lg px-3 py-2">
+                <span className="size-1.5 shrink-0 rounded-full bg-[var(--theme-accent)] mt-1.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-ink truncate">
+                    {id && <span className="font-mono text-muted mr-1">{id}</span>}
+                    {title || label}
+                  </p>
+                  <p className="text-[10px] text-muted">
+                    <span className="capitalize">{label}</span>
+                    {' · '}
+                    {timeAgo(item.createdAt)}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </PaperclipCard>
     )
